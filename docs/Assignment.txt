@@ -1,0 +1,176 @@
+                      Assignment: Applied Ensemble Learning
+                     EECE 490/690 – Introduction to Machine Learning
+                             American University of Beirut
+                                             Fall 2026–2027
+
+
+
+Random Forests and Boosting
+Submission: One fully executed .ipynb file and one short video             Total: 100 points
+Group size: Three students                                Dataset: Choose ONE option below
+
+Why This Assignment
+Random Forests and boosting are powerful ensemble methods, but achieving a reliable result depends
+on much more than fitting a model. Real datasets introduce missing or invalid values, categorical
+features, class imbalance, and the risk of data leakage. A good practitioner must select appropriate
+methods, compare them fairly, and explain the resulting predictions.
+This assignment evaluates your ability to:
+• Prepare realistic tabular data without leaking information from the test set.
+• Explain the difference between bagging and boosting through experiments.
+• Evaluate models beyond accuracy, especially when classes are imbalanced.
+The emphasis is on sound decisions and clear interpretation, not on achieving the highest possible
+accuracy.
+
+Approved Datasets (Choose ONE)
+
+A. Electrical Grid Sta-      Binary classification of stable versus unstable simulated grid
+bility                       states (about 10,000 samples). Mostly numerical features. Kaggle
+                             dataset.
+B. Heart Disease Pre-        Binary classification using patient measurements and clinical at-
+diction                      tributes (918 samples). Includes numerical and categorical features.
+                             Kaggle dataset.
+
+
+
+
+                                                   1
+Required Setup (Mandatory)
+Begin your notebook with a short Experiment Setup Box. Complete all fields before modeling.
+The quality of this setup is assessed in Part 1.
+Experiment Setup Box
+Dataset (A / B):      Target column and positive class:
+Dataset size: Random seed: Train/test split (suggested: 80/20):
+Primary evaluation metric and reason:
+Group members and individual responsibilities:
+
+Main Tasks
+Complete all seven parts in your notebook. Include code, appropriate visualizations, and a concise
+interpretation after each major experiment.
+
+Part 1 – Understanding the Dataset and EDA                                               (15 points)
+
+1. Identify the target, feature types, dataset size, and class frequencies. Provide at least three
+   informative visualizations (one must display class distribution).
+2. Check for missing values, invalid entries, inconsistent data types, and features that may leak the
+   label.
+3. Establish a DummyClassifier majority-class baseline and explain why accuracy alone may be
+   misleading.
+4. State which metric (e.g., F1, ROC-AUC, recall) matters most for your application and explain
+   why.
+
+Remember: Would a classifier that always predicts the majority class be useful?
+
+Part 2 – Preprocessing and Data Quality                                                  (20 points)
+Implement two clearly documented preprocessing alternatives: (i) a basic pipeline using justified
+imputation/encoding where appropriate, and (ii) an improved pipeline testing a more thoughtful
+strategy. You are encouraged to explore techniques not covered in class for this pipeline,
+provided you explain them briefly in your short video. Do not remove information simply
+because preprocessing is inconvenient.
+
+Dataset-specific investigation (complete only your dataset’s task):
+
+• A – Grid: Exclude the numerical stab score when predicting stabf: the class is derived from
+  that score. After splitting the data, reproducibly hide 5% of values in two selected sensor features
+  (same missingness pattern for all compared approaches). Compare simple imputation with KNN
+  imputation. Mark these results as a simulated missing-data experiment.
+• B – Heart: Investigate zero measurements in RestingBP and Cholesterol. Justify whether to
+  retain them or treat them as unavailable, then compare an alternative using imputation and/or
+  missingness indicators. Encode categorical attributes appropriately.
+Important: Split the data before fitting imputers, encoders, or resamplers. Fit all preprocessing
+operations on training data only; inside cross-validation, refit them within each training fold.
+
+
+
+
+                                                  2
+Part 3 – Random Forests and Boosting                                                        (20 points)
+Train and compare the following classifiers using identical data partitions:
+1. Random Forest – bagging and randomized feature selection.
+2. AdaBoost – sequentially reweights attention to difficult cases.
+3. XGBoost – regularized gradient-boosted decision trees.
+Keep the DummyClassifier from Part 1 as a reference. Use a modest stratified 3-fold cross-
+validation experiment to explore two hyperparameters for Random Forest (e.g., max_depth and
+min_samples_leaf) and two for XGBoost (e.g., max_depth and learning_rate). Limit tuning to
+six candidate settings per model. AdaBoost may use its default settings.
+Guiding questions: Why can boosting outperform bagging? When can boosting overfit? Did extra
+complexity help?
+
+Part 4 – Class Imbalance and SMOTE                                                          (10 points)
+Investigate the positive/negative class ratio and perform one controlled imbalance-handling
+experiment:
+• Compare a model trained on the original data with one using SMOTE for numeric data or
+  SMOTENC for mixed categorical/numerical data. For mixed-type data, handle categorical
+  features correctly rather than applying ordinary SMOTE to one-hot indicators.
+• Apply resampling only inside training folds, using an imblearn pipeline. Never resample the
+  final test data. Ensure any distance-dependent preprocessing is appropriate for SMOTE.
+• Discuss whether resampling was actually needed. A balanced dataset may show no improvement;
+  that is a valid finding.
+Guiding question: Can recall improve while precision or accuracy worsens?
+
+Part 5 – Fair Evaluation and Comparison                                                     (15 points)
+Use validation results, not the test set, to choose a final model. Your notebook must contain:
+• A comparison table showing accuracy, precision, recall, F1, and ROC-AUC (report the
+  positive class and specify validation versus test results).
+• A confusion matrix and one ROC or precision–recall curve for the final model.
+• A short analysis of training versus validation performance and potential overfitting.
+• One final evaluation on the untouched test set after model selection.
+Guiding question: Would you select a different model if false negatives were especially costly?
+
+ Fair-comparison rule. Change one factor at a time. For example, compare Random Forest with the basic
+ and improved pipelines before claiming that a performance gain comes from changing the model rather than
+ the preprocessing.
+
+
+
+
+                                                    3
+Part 6 (BONUS) – Explainability with SHAP                                               (+10 points)
+As we discussed, tree models are known for being highly interpretable. Consequently, many ML
+engineers apply explainable AI (XAI) techniques on top of these models. This is a bonus section
+you can explore that has not been covered in class.
+Apply SHAP to your selected tree-based classifier. Provide:
+1. A global explanation (e.g., SHAP summary/beeswarm or mean absolute SHAP values)
+   identifying the most influential features.
+2. A local explanation (e.g., waterfall plot) for one individual prediction, preferably a false
+   positive or false negative.
+3. A brief discussion of whether the explanation is sensible for your application and why predictive
+   importance does not establish causality.
+Optional extension (up to 5 bonus points): Use LIME on the same individual prediction. Compare
+it with SHAP and discuss any disagreement; do not merely paste a second plot.
+
+Part 7 – Conclusions and Responsible Use                                                (10 points)
+In approximately 250–400 words, answer all six questions:
+1. Which model would you recommend, and why?
+2. Which preprocessing decision had the greatest measured effect?
+3. Did boosting improve on Random Forest? What might explain the result?
+4. Did SMOTE/SMOTENC help or hurt? Why?
+5. What did the model explanations reveal?
+6. What is one limitation or risk that would matter in a real deployment?
+
+Submission and Evidence Requirements
+• Submit one ZIP file per group of three, including one .ipynb file with cells executed from top
+  to bottom, readable charts, short Markdown explanations, and a fixed random seed, and one
+  .mp4 short video recording (5 minutes total for the team) wherein each member of the team
+  discusses a section of the notebook and what they learned while working on it.
+• Cite the Kaggle dataset and at least two relevant technical sources (documentation, tutorials, or
+  papers). Note any AI-assisted code and verify its correctness.
+• State member contributions. Include package requirements or versions so the notebook can be
+  reproduced. Large dataset files need not be embedded; include download instructions.
+• No lengthy report or slide deck is required. Credit is awarded for correct experimentation and
+  interpretation, not for the highest accuracy.
+
+Grading Rubric
+Assessment area           Points      Full-credit expectations
+Data understanding        15          Inspection, visualizations, baseline, justified metric.
+Preprocessing             20          Leakage-safe pipelines; sound data-quality experiment.
+Model comparison          20          Fair Random Forest/boosting comparison; bounded tuning.
+Class imbalance           10          Correct SMOTE/SMOTENC application and interpretation.
+Evaluation                20          Clear validation, correct plots, untouched final test.
+Explainability            +10         Meaningful global/local SHAP explanations and limitations.
+Conclusions               15          Evidence-based choices, limitations, and real-world risks.
+Total                     100
+Recommended references: scikit-learn documentation; imbalanced-learn documentation; XGBoost docu-
+mentation; SHAP documentation.
+
+                                                 4
+
